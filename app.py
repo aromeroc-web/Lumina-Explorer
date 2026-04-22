@@ -1,75 +1,73 @@
 import streamlit as st
 import google.generativeai as genai
 
-# 1. Configuración de Seguridad para la API Key
+# 1. Configuración de la API Key
 try:
     api_key = st.secrets["GOOGLE_API_KEY"]
     genai.configure(api_key=api_key)
-except Exception as e:
-    st.error("No se encontró la llave 'GOOGLE_API_KEY' en los Secrets de Streamlit.")
+except Exception:
+    st.error("Error: Revisa la configuración de GOOGLE_API_KEY en los Secrets de Streamlit.")
     st.stop()
 
-# SYSTEM PROMPT BASADO EN TU PDF DE LUMINA SPARK
+# SYSTEM PROMPT: Configuración de Lumina Spark basada en tu PDF
 system_prompt = """
-Eres un Facilitador experto en Lumina Spark. Tu misión es guiar una autoevaluación para las 3 Personas: Natural, Cotidiana y Sobreextendida.
+Eres un Facilitador experto de Lumina Spark. Tu misión es realizar una autoevaluación profesional.
 
-DINÁMICA DE LAS 24 CUALIDADES (Usa los términos de tu PDF):
-1. Persona Natural (Subyacente): Usa los nombres estándar (ej. Imaginativo, Estructurado).
-2. Persona Cotidiana (Adaptada): Usa los mismos nombres pero enfocado en el entorno laboral.
-3. Persona Sobreextendida (Bajo Presión): Usa los DESCRARRILADORES del PDF:
+METODOLOGÍA DE LAS 24 CUALIDADES (Usa los nombres del PDF):
+- Persona Natural (Subyacente): Usa nombres estándar (ej. Imaginativo, Determinado).
+- Persona Cotidiana (Adaptada): Enfocado en el entorno laboral actual.
+- Persona Sobreextendida (Bajo Presión): Usa los DESCRARRILADORES exactos del PDF:
    - Imaginativo -> Fantasioso
-   - Radical -> Cambiante por el gusto al cambio
-   - Práctico -> Visión estrecha
-   - Basado en evidencia -> Perdido en los detalles
    - Se hace cargo -> Controlador
    - Determinado -> Obsesionado por objetivos
    - Estructurado -> Planeación rígida
    - Confiable -> Indeciso
-   - (Aplica esta lógica a las 24 cualidades).
+   - Basado en evidencia -> Perdido en los detalles
 
-PROCESO DE PUNTUACIÓN (Paso a paso):
-- Solicita las 5 cualidades MÁS utilizadas (75%-99%).
-- Solicita las 5 cualidades MENOS utilizadas (1%-15%).
-- El resto de las 14 cualidades puntúan entre 16% y 74%.
+DINÁMICA DE PUNTUACIÓN:
+Para cada una de las 3 personas, solicita:
+1. Las 5 cualidades MÁS usadas (rango 75%-99%).
+2. Las 5 cualidades MENOS usadas (rango 1%-15%).
+3. Las 14 restantes (rango 16%-74%).
 
-CÁLCULOS FINALES:
-Al finalizar, muestra promedios comparativos para Natural, Cotidiana y Sobreextendida en:
-- 4 Arquetipos: Amarillo Inspirador, Rojo Directivo, Azul Analítico y Verde Empoderado.
+RESULTADOS ESPERADOS:
+Al finalizar, muestra tablas comparativas para Natural, Cotidiana y Sobreextendida en:
+- 4 Arquetipos de Color: Amarillo, Rojo, Azul y Verde.
 - 8 Atributos: Enfoque en Resultados, Disciplina, Inspiración, Gran Visión, Influencia, Orientación a las Personas, Empoderamiento y Observación.
 """
 
-# Configuración del modelo con el nombre corregido
+# ESTA LÍNEA ES LA QUE CORRIGE EL ERROR 404
 model = genai.GenerativeModel(
-    model_name='models/gemini-1.5-flash',
+    model_name='gemini-1.5-flash', 
     system_instruction=system_prompt
 )
 
-# 2. Interfaz de Usuario
+# 2. Interfaz de la aplicación
 st.set_page_config(page_title="Autoevaluación Lumina FTF", layout="wide")
-st.title("📊 Autoevaluación de Desempeño: Modelo FTF")
+st.title("📊 Autoevaluación People Performance Intelligence")
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
-    # Saludo inicial automático
     try:
-        response = model.generate_content("Hola. Inicia la evaluación presentándote y solicitando los datos de la Persona Natural.")
+        # Generar primer saludo
+        response = model.generate_content("Hola. Preséntate como consultor FTF e inicia la fase de Persona Natural.")
         st.session_state.messages.append({"role": "assistant", "content": response.text})
     except Exception as e:
-        st.error(f"Error de conexión con Google: {e}. Revisa que tu API KEY sea válida en AI Studio.")
+        st.error(f"Error de conexión: {e}")
 
 # Mostrar chat
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# Entrada de texto
+# Entrada de respuestas
 if prompt := st.chat_input("Escribe tu respuesta aquí..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        # Construir historial
+        # Historial para mantener el contexto de la evaluación
         history = []
         for m in st.session_state.messages[:-1]:
             role = "model" if m["role"] == "assistant" else "user"
