@@ -35,7 +35,7 @@ Muestra promedios por:
 Calcula esto para las 3 dimensiones (Natural, Cotidiana, Sobreextendida).
 """
 
-model = genai.GenerativeModel(model_name='gemini-1.5-flash', system_instruction=system_prompt)
+model = genai.GenerativeModel(model_name='models/gemini-1.5-flash', system_instruction=system_prompt)
 
 # 2. Interfaz Streamlit
 st.set_page_config(page_title="Autoevaluación FTF", layout="wide")
