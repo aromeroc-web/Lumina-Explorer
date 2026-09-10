@@ -32,7 +32,7 @@ Al final, muestra promedios comparativos para las 3 Personas en:
 
 # CAMBIO CRÍTICO: Usamos el nombre del modelo más simple posible
 model = genai.GenerativeModel(
-    model_name='gemini-1.5-flash',
+    model_name='gemini-3.6-flash',
     system_instruction=system_prompt
 )
 
